@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Better Judgement</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --primary: #6c5ce7;
+            --primary-dark: #5649c0;
+            --accent: #fdcb6e;
+            --accent-dark: #e1b12c;
+            --text: #2d3436;
+            --border-color: #2d3436;
+            --shadow: 4px 4px 0px var(--border-color);
+            --shadow-hover: 2px 2px 0px var(--border-color);
+            --border-width: 3px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Container & Animations */
+        #app-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            perspective: 1000px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: var(--border-width) solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            position: relative;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    
+        .btn-group {
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            }
+        /* Typography */
+        h1, h2, h3 {
+            font-family: 'Fredoka', sans-serif;
+            margin-top: 0;
+            color: var(--text);
+        }
+
+        h1 { font-size: 2.5rem; text-align: center; color: var(--primary); -webkit-text-stroke: 1px var(--border-color); }
+        h2 { font-size: 1.8rem; margin-bottom: 20px; }
+        p { font-size: 1.1rem; line-height: 1.6; margin-bottom: 20px; }
+        
+        .subtitle {
+            text-align: center;
+            font-weight: 700;
+            opacity: 0.7;
+            margin-top: -10px;
+            margin-bottom: 30px;
+        }
+
+        /* Inputs */
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: var(--border-width) solid var(--border-color);
+            border-radius: 12px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            outline: none;
+            transition: transform 0.2s;
+            resize: vertical;
+        }
+
+        textarea:focus, input[type="text"]:focus {
+            transform: scale(1.02);
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+
+        /* Custom Slider */
+        .slider-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 30px;
+            width: 30px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: var(--border-width) solid var(--border-color);
+            cursor: pointer;
+            margin-top: -12px;
+            box-shadow: 2px 2px 0px var(--border-color);
+            transition: transform 0.1s;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #dfe6e9;
+            border: var(--border-width) solid var(--border-color);
+            border-radius: 5px;
+        }
+
+        .labels {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 30px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.2rem;
+            border: var(--border-width) solid var(--border-color);
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.2s;
+            text-align: center;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+            box-shadow: var(--shadow-hover);
+            transform: translate(2px, 2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--accent);
+            color: var(--text);
+            margin-top: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--accent-dark);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text);
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            background-color: #eee;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Hidden/Visible Logic */
+        .step { display: none; }
+        .step.active { display: block; }
+
+        /* Summary Styling */
+        .summary-item {
+            background: #fff;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .summary-label {
+            font-weight: bold;
+            color: var(--primary);
+            font-family: 'Fredoka', sans-serif;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* Emotion Warning */
+        #emotion-warning {
+            background-color: #ff7675;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            margin-bottom: 15px;
+            display: none;
+            font-weight: bold;
+            text-align: center;
+            animation: shake 0.5s;
+        }
+
+        /* Joust Animation */
+        .vs-circle {
+            width: 50px;
+            height: 50px;
+            background: var(--accent);
+            border: var(--border-width) solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-family: 'Fredoka', sans-serif;
+            margin: 10px auto;
+            z-index: 10;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background: #dfe6e9;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Animations */
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    
+    <div id="step-0" class="step active card" style="text-align: center;">
+        <h1>Better Judgement</h1>
+        <p class="subtitle">A clear-headed decision engine.</p>
+        <p>Make better decisions by stripping away noise, emotion, and "blended reasons."</p>
+        <div style="font-size: 5rem; margin: 20px;">🧠</div>
+        <button class="btn" onclick="nextStep()">Start Decision Survey</button>
+    </div>
+
+    <div id="survey-wrapper" style="display: none;">
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div class="card">
+            
+            <div id="step-1" class="step">
+                <h2>Step 1: The Decision</h2>
+                <p>Describe the decision you need to make in the length of a tweet (140 chars).</p>
+                <textarea id="decision-text" maxlength="140" rows="3" placeholder="Should I..."></textarea>
+                <button class="btn" onclick="validateAndNext('decision-text')">Next</button>
+            </div>
+
+            <div id="step-2" class="step">
+                <h2>Step 2: Emotional Check-in</h2>
+                <p>What are you feeling right now?</p>
+                
+                <div id="emotion-warning">⚠️ Warning: Extreme emotions lead to poor decisions. Consider pausing.</div>
+
+                <div class="slider-container">
+                    <input type="range" id="emotion-slider" min="1" max="5" value="3" oninput="checkEmotion()">
+                    <div class="labels">
+                        <span style="color: #e74c3c">Fear</span>
+                        <span style="color: #2d3436">Neutral</span>
+                        <span style="color: #27ae60">Greed</span>
+                    </div>
+                    <p id="emotion-label" style="text-align: center; margin-top: 15px; font-weight: bold; color: var(--primary);">Neutral</p>
+                </div>
+                <button class="btn" onclick="nextStep()">Next</button>
+            </div>
+
+            <div id="step-3" class="step">
+                <h2>Step 3: One Reason FOR</h2>
+                <p>What is the <strong>single decisive reason</strong> to do this? </p>
+                <p style="font-size: 0.9rem; opacity: 0.8;">Do not list 5 things. If you have 5 reasons, you have 0 reasons. Pick the one that matters.</p>
+                <input type="text" id="reason-for" placeholder="I should do this because...">
+                <button class="btn" onclick="validateAndNext('reason-for')">Next</button>
+            </div>
+
+            <div id="step-4" class="step">
+                <h2>Step 4: One Reason AGAINST</h2>
+                <p>What is the <strong>single decisive reason</strong> NOT to do this?</p>
+                <input type="text" id="reason-against" placeholder="I should NOT do this because...">
+                <button class="btn" onclick="validateAndNext('reason-against')">Next</button>
+            </div>
+
+            <div id="step-5" class="step">
+                <h2 style="text-align: center;">The Joust ⚔️</h2>
+                <p style="text-align: center;">Which argument is stronger?</p>
+                
+                <div style="background: #e8f8f5; padding: 15px; border-radius: 10px; border: 2px solid var(--border-color); margin-bottom: 10px;">
+                    <strong>FOR:</strong> <span id="display-for"></span>
+                </div>
+                
+                <div class="vs-circle">VS</div>
+                
+                <div style="background: #fdedec; padding: 15px; border-radius: 10px; border: 2px solid var(--border-color); margin-bottom: 20px;">
+                    <strong>AGAINST:</strong> <span id="display-against"></span>
+                </div>
+
+                <p style="font-size: 0.9rem; text-align: center;">Ask yourself: Is the reason honest? Is it real value?</p>
+
+                <button class="btn" onclick="nextStep()">Continue</button>
+            </div>
+
+            <div id="step-6" class="step">
+                <h2>Step 6: Reality Check</h2>
+                <p><strong>Trigger:</strong> What triggered this? (FOMO, Boredom, Envy?)</p>
+                <input type="text" id="trigger-input" placeholder="e.g. My friend did it...">
+                
+                <p><strong>Substitutes:</strong> Is there a cheaper/simpler way to get the same benefit?</p>
+                <input type="text" id="substitute-input" placeholder="e.g. I could just...">
+                
+                <button class="btn" onclick="validateAndNext(['trigger-input', 'substitute-input'])">Next</button>
+            </div>
+
+            <div id="step-7" class="step">
+                <h2>Step 7: The Future</h2>
+                <p><strong>Reversible?</strong> If yes, move fast. If no, slow down.</p>
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                    <button class="btn btn-secondary" onclick="setReversibility('Yes')">Yes, Reversible</button>
+                    <button class="btn btn-secondary" onclick="setReversibility('No')">No, Irreversible</button>
+                </div>
+                <input type="hidden" id="reversibility-input">
+
+                <p><strong>Prediction:</strong> What do you honestly think will happen?</p>
+                <textarea id="prediction-input" rows="2" placeholder="I predict that..."></textarea>
+                
+                <button class="btn" onclick="generateSummary()">Finish</button>
+            </div>
+
+            <div id="step-8" class="step">
+                <h2 style="text-align: center;">Verdict</h2>
+                
+                <div class="summary-item">
+                    <span class="summary-label">Decision</span>
+                    <span id="sum-decision"></span>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <div class="summary-item" style="flex: 1; border-color: #27ae60; background: #f0fdf4;">
+                        <span class="summary-label" style="color: #27ae60;">Reason For</span>
+                        <span id="sum-for"></span>
+                    </div>
+                    <div class="summary-item" style="flex: 1; border-color: #e74c3c; background: #fef2f2;">
+                        <span class="summary-label" style="color: #e74c3c;">Reason Against</span>
+                        <span id="sum-against"></span>
+                    </div>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Emotional State</span>
+                    <span id="sum-emotion"></span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Prediction</span>
+                    <span id="sum-prediction"></span>
+                </div>
+
+                <p style="text-align: center; font-weight: bold;">Based on the evidence above, what is your call?</p>
+                
+                <button class="btn" style="background-color: #27ae60; margin-bottom: 10px;" onclick="alert('Go forth and execute!')">✅ Do It</button>
+                <button class="btn" style="background-color: #e74c3c;" onclick="alert('Decision shelved. Good restraint.')">❌ Don't Do It</button>
+                
+                <br><br>
+                <button class="btn btn-outline" onclick="location.reload()">Start Over</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentStep = 0;
+    const totalSteps = 8;
+    const data = {};
+
+    function nextStep() {
+        // Hide current
+        document.getElementById(`step-${currentStep}`).classList.remove('active');
+        
+        // Logic for specific steps transitions
+        if (currentStep === 0) {
+            document.getElementById('step-0').style.display = 'none';
+            document.getElementById('survey-wrapper').style.display = 'block';
+            currentStep = 1;
+        } else {
+            currentStep++;
+        }
+
+        // Show next
+        if (currentStep <= totalSteps) {
+            const nextEl = document.getElementById(`step-${currentStep}`);
+            nextEl.classList.add('active');
+            
+            // Re-trigger animation
+            nextEl.style.animation = 'none';
+            nextEl.offsetHeight; /* trigger reflow */
+            nextEl.style.animation = 'popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
+            
+            updateProgress();
+            
+            // Populate "Joust" values if entering step 5
+            if (currentStep === 5) {
+                document.getElementById('display-for').innerText = document.getElementById('reason-for').value;
+                document.getElementById('display-against').innerText = document.getElementById('reason-against').value;
+            }
+        }
+    }
+
+    function validateAndNext(ids) {
+        if (!Array.isArray(ids)) ids = [ids];
+        
+        let valid = true;
+        ids.forEach(id => {
+            const val = document.getElementById(id).value.trim();
+            if (!val) valid = false;
+        });
+
+        if (valid) {
+            nextStep();
+        } else {
+            // Simple shake effect on button or input could go here
+            alert("Please fill in the field to continue.");
+        }
+    }
+
+    function updateProgress() {
+        const pct = ((currentStep - 1) / (totalSteps - 1)) * 100;
+        document.getElementById('progress-bar').style.width = pct + '%';
+    }
+
+    function checkEmotion() {
+        const val = document.getElementById('emotion-slider').value;
+        const label = document.getElementById('emotion-label');
+        const warning = document.getElementById('emotion-warning');
+        
+        const map = {
+            '1': { text: 'Extreme Fear', color: '#e74c3c', warn: true },
+            '2': { text: 'Some Fear', color: '#e67e22', warn: false },
+            '3': { text: 'Neutral', color: '#2d3436', warn: false },
+            '4': { text: 'Some Greed', color: '#27ae60', warn: false },
+            '5': { text: 'Extreme Greed', color: '#2ecc71', warn: true }
+        };
+
+        label.innerText = map[val].text;
+        label.style.color = map[val].color;
+        
+        if (map[val].warn) {
+            warning.style.display = 'block';
+        } else {
+            warning.style.display = 'none';
+        }
+    }
+
+    function setReversibility(val) {
+        document.getElementById('reversibility-input').value = val;
+        // Visual feedback
+        const btns = document.querySelectorAll('#step-7 .btn-secondary');
+        btns.forEach(b => b.style.backgroundColor = 'var(--accent)'); // reset
+        event.target.style.backgroundColor = 'var(--accent-dark)';
+    }
+
+    function generateSummary() {
+        // Collect Data
+        data.decision = document.getElementById('decision-text').value;
+        data.emotion = document.getElementById('emotion-label').innerText;
+        data.reasonFor = document.getElementById('reason-for').value;
+        data.reasonAgainst = document.getElementById('reason-against').value;
+        data.prediction = document.getElementById('prediction-input').value;
+
+        // Fill Summary
+        document.getElementById('sum-decision').innerText = data.decision;
+        document.getElementById('sum-emotion').innerText = data.emotion;
+        document.getElementById('sum-for').innerText = data.reasonFor;
+        document.getElementById('sum-against').innerText = data.reasonAgainst;
+        document.getElementById('sum-prediction').innerText = data.prediction || "No prediction made.";
+
+        nextStep(); // Move to step 8
+    }
+</script>
+
+</body>
+</html>
